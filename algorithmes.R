@@ -29,7 +29,7 @@ Outlier <- function(donnee, seuil_p_value, VP, m, lambda) {
 
   # Calcul de la statistique S
   for (j in 1:length(lambda)) {
-    S <- S + 1/lambda[j] * sum((vectPV[, j] * (donnee - m)^2))
+    S <- S + 1/lambda[j] * sum(((vectPV[, j] * (donnee - m))^2))
   }
 
   # Calcul de la p-value basée sur la statistique du Chi2
@@ -116,9 +116,10 @@ RobbinsMC2=function(mc_sample_size=10000,vp,epsilon=10^(-8),alpha=0.75,c=2,w=2,s
 
 
 #Fonction qui estime m, et V et détecte la présence d'outliers online
-estimMVOutliers <- function(Y,c,n,d,q,r)
+estimMVOutliers <- function(Y,c,n,d,q=ncol(Y),r)
 {
-
+  ###Antoine: a mon avis pas besoin de mettre n et d en entréee mais juste mettre n=nrow(Y), d=ncol(Y)
+  ####Antoine Pour q j'ai mis par défaut le nombre de colonne de Y, i.e d
   sampsize = d^2
 
   #Initialisation du vecteur avec les vrais paramètres
@@ -141,8 +142,8 @@ estimMVOutliers <- function(Y,c,n,d,q,r)
 
   #Initialisation de V
 
-  V = matrix(0,d,d)
-
+  # Antoine: j'ai changéee ton initialisation de V V = matrix(0,d,d)
+  V = diag(d)
   #Calcul de la vraie matrice de covariance médiane
 
   #Vvrai <- WeiszfeldCov(Yv,nitermax = 1000)$covmedian
@@ -193,7 +194,7 @@ estimMVOutliers <- function(Y,c,n,d,q,r)
   U <- array(1, dim = c(n, q, q))
 
   #Initialisation de U avec des vecteurs propres pas trop éloignés de ceux de cov(X)
-
+  ### Antoine:  a terme il faudra mettre l'initialisation de U en option 
   U[1,,] <-  1.5*diag(q)
 
 
@@ -327,13 +328,13 @@ estimMVOutliers <- function(Y,c,n,d,q,r)
 }
 
 
-streaming <- function(Y,t,k,c,n,d,q,r)
+streaming <- function(Y,t,k,c,n,d,q=ncol(Y),r)
 {
-  
+  ####Antoine: il faut mettre sampsize en option
   sampsize = d^2
   
   
-  
+  ###Antoine: Il faudra mettre l'initialisation en option
   #Initialisation de m
   m = r*rnorm(d)
   
@@ -362,8 +363,9 @@ streaming <- function(Y,t,k,c,n,d,q,r)
   #Sigma <- diag(d)
   
   #Initialisation de V
-  
-  V = matrix(0,d,d)
+
+  ###Antoine: Je t'ai changé l'initalisation de V
+  V = diag(d)
   
   
   
@@ -464,7 +466,7 @@ streaming <- function(Y,t,k,c,n,d,q,r)
     VIter[,,i] <- moyenneV
     
     #Estimation des vecteurs propres de Vt et orthonormalisation
-    
+    ### Antoine q ou d?
     for (l in (1:d)) 
     {
       Un =  U[i,,l]/sqrt(sum(U[i,,l]^2))
